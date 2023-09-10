@@ -55,7 +55,7 @@ class Login(Resource):
 
     def post(self):
         
-        username = request.get_json()['username']
+        username = request.get_json().get('username')
         user = User.query.filter(User.username == username).first()
 
         if user:
