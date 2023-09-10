@@ -55,7 +55,7 @@ class Login(Resource):
 
     def post(self):
         
-        username = request.get_json().get('username')
+        username = request.get_json()['username']
         user = User.query.filter(User.username == username).first()
 
         if user:
@@ -87,12 +87,24 @@ class CheckSession(Resource):
 class MemberOnlyIndex(Resource):
     
     def get(self):
-        pass
+
+        if not session['user_id']:
+            return {'error': 'Unauthorized'}, 401
+
+        articles = [article.to_dict() for article in Article.query.filter(Article.is_member_only == True).all()]
+        return make_response(jsonify(articles), 200)
 
 class MemberOnlyArticle(Resource):
     
     def get(self, id):
-        pass
+
+        if not session['user_id']:
+            return {'error': 'Unauthorized'}, 401
+
+        article = Article.query.filter(Article.id == id, Article.is_member_only == True).first()
+        article_json = article.to_dict()
+
+        return article_json, 200
 
 api.add_resource(ClearSession, '/clear', endpoint='clear')
 api.add_resource(IndexArticle, '/articles', endpoint='article_list')
